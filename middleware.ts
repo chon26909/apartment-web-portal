@@ -6,7 +6,9 @@ export async function middleware(request: NextRequest) {
 
     const { pathname } = request.nextUrl;
 
-    if (pathname.startsWith('/protected') && (!user || user.role !== 'admin')) {
+    const isAuthRoute = ['/profile', '/protected'].includes(pathname);
+
+    if (isAuthRoute && (!user || user.role !== 'admin')) {
         return NextResponse.redirect(new URL('/auth/login', request.url));
     }
 
