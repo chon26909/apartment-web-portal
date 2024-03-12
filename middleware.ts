@@ -7,7 +7,7 @@ import { publicRoutes } from './routes';
 const { auth } = NextAuth(authConfig);
 
 export default auth((req: any) => {
-    console.log(req);
+    console.log('auth middleware', req);
 });
 
 export async function middleware(request: NextRequest) {
