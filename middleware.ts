@@ -40,7 +40,13 @@ export default withAuth(
             authorized: ({ token }) => {
                 console.log('auth ', token);
 
-                return token?.role === 'admin';
+                // return token?.role === 'admin';
+
+                if (token) {
+                    return true;
+                }
+
+                return false;
             }
         },
         pages: {
