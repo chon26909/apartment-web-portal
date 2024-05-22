@@ -7,7 +7,7 @@ import { AdapterUser } from 'next-auth/adapters';
 // import authConfig from '@/auth.config';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
-import bcrypt from 'bcrypt';
+// import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 export const authOptions: AuthOptions = {
@@ -19,33 +19,45 @@ export const authOptions: AuthOptions = {
                 password: { label: 'Password', type: 'password', placeholder: '' }
             },
             async authorize(credentials, req) {
-                if (!credentials) return null;
-                const user = await prisma.user.findUnique({
-                    where: { email: credentials.email }
-                });
+                // if (!credentials) return null;
+                // const user = await prisma.user.findUnique({
+                //     where: { email: credentials.email }
+                // });
 
-                if (!user) {
-                    return new Promise((resolve, reject) => {
-                        reject(new Error('Email not found'));
-                    });
-                }
+                // if (!user) {
+                //     return new Promise((resolve, reject) => {
+                //         reject(new Error('Email not found'));
+                //     });
+                // }
 
-                if (user && (await bcrypt.compare(credentials.password, String(user.password)))) {
-                    const data = new Promise<User>((resolve) =>
-                        resolve({
-                            id: user.id.toString(),
-                            name: user.name,
-                            email: user.email,
-                            image: '',
-                            role: user.role
-                        })
-                    );
+                // if (user && (await bcrypt.compare(credentials.password, String(user.password)))) {
+                //     const data = new Promise<User>((resolve) =>
+                //         resolve({
+                //             id: user.id.toString(),
+                //             name: user.name,
+                //             email: user.email,
+                //             image: '',
+                //             role: user.role
+                //         })
+                //     );
 
-                    return data;
-                }
-                return new Promise((resolve, reject) => {
-                    reject(new Error('Password incorrect'));
-                });
+                //     return data;
+                // }
+                // return new Promise((resolve, reject) => {
+                //     reject(new Error('Password incorrect'));
+                // });
+
+                const data = new Promise<User>((resolve) =>
+                    resolve({
+                        id: '12345',
+                        name: 'Admin',
+                        email: credentials?.email,
+                        image: '',
+                        role: 'ADMIN'
+                    })
+                );
+
+                return data;
             }
         }),
         GoogleProvider({
@@ -71,17 +83,19 @@ export const authOptions: AuthOptions = {
     callbacks: {
         async signIn({ user }) {
             if (user) {
-                const existingUser = await prisma.user.findUnique({
-                    where: { email: String(user.email) }
-                });
+                // const existingUser = await prisma.user.findUnique({
+                //     where: { email: String(user.email) }
+                // });
+
+                let existingUser = true;
 
                 console.log('existing user', existingUser);
 
                 //const existingUser = await getUserById(user.id as string);
 
-                if (!existingUser || !existingUser.emailVerified) {
-                    return false;
-                }
+                // if (!existingUser || !existingUser.emailVerified) {
+                //     return false;
+                // }
             }
 
             return true;
@@ -105,8 +119,24 @@ export const authOptions: AuthOptions = {
             }
             return session;
         },
-        async redirect({ baseUrl }) {
-            return `${baseUrl}/profile`;
+        async redirect({ url, baseUrl }) {
+            console.log('baseUrl', baseUrl);
+            console.log('url', url);
+
+            // // Allows relative callback URLs
+            // if (url.startsWith('/')) return `${baseUrl}${url}`;
+            // // Allows callback URLs on the same origin
+            // else if (new URL(url).origin === baseUrl) return url;
+
+            const callbackUrl = url.split('?callbackUrl=%2F');
+
+            if (callbackUrl[1]) {
+                console.log('callbackUrl', callbackUrl);
+
+                return '/' + callbackUrl[1];
+            }
+
+            return '/';
         }
     }
 };

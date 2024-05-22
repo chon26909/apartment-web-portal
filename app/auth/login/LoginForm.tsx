@@ -12,16 +12,19 @@ export default function LoginForm() {
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
-            const result: any = await signIn('credentials', {
-                redirect: false,
+            const res: any = await signIn('credentials', {
+                redirect: true,
                 email,
                 password
             });
 
-            if (result.error) {
-                console.error('signin error', result.error);
+            console.log('res', res);
+
+            if (res.ok) {
+                console.log('login ok');
             } else {
-                router.push('/profile');
+                console.error('signin error', res.error);
+                //  router.push('/profile');
             }
         } catch (error) {
             console.log('error = ', error);
