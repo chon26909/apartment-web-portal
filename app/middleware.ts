@@ -30,30 +30,34 @@
 // }
 
 import { withAuth } from 'next-auth/middleware';
+import { NextRequest, NextResponse } from 'next/server';
 
-export default withAuth(
-    function middleware(req) {
-        console.log('token', req.nextauth.token);
-    },
-    {
-        callbacks: {
-            authorized: ({ token }) => {
-                console.log('auth ', token);
+// export default withAuth(
+//     function middleware(req) {
+//         console.log('token', req.nextauth.token);
+//     },
+//     {
+//         callbacks: {
+//             authorized: ({ token }) => {
+//                 console.log('auth ', token);
 
-                // return token?.role === 'admin';
+//                 if (token) {
+//                     return true;
+//                 }
 
-                if (token) {
-                    return true;
-                }
+//                 return false;
+//             }
+//         },
+//         pages: {
+//             signIn: '/auth/login',
+//             error: '/error'
+//         }
+//     }
+// );
 
-                return false;
-            }
-        },
-        pages: {
-            signIn: '/auth/login',
-            error: '/error'
-        }
-    }
-);
-
-export const config = { matcher: ['/profile', '/dashboard'] };
+// This function can be marked `async` if using `await` inside
+export function middleware(request: NextRequest) {
+    console.log("middleware called")
+    return NextResponse.redirect(new URL('/home', request.url))
+}
+export const config = { matcher: ['/'] };

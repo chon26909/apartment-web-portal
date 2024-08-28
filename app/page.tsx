@@ -1,6 +1,4 @@
 import React from 'react';
-import { getServerSession } from 'next-auth';
-import Home from './game/GamePage';
 
 const HomePage = async () => {
     // const session = await getServerSession();
