@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { FaArrowRight } from 'react-icons/fa';
+import React, { useEffect, useRef, useState } from 'react';
+import { FaArrowRight, FaCheck } from 'react-icons/fa';
 
 const SwipeButton = () => {
-    const constraintsRef = React.useRef<HTMLDivElement>(null);
-    const draggableRef = React.useRef<HTMLDivElement>(null);
+    const constraintsRef = useRef<HTMLDivElement>(null);
+    const draggableRef = useRef<HTMLDivElement>(null);
+    const slideEffectRef = useRef<HTMLDivElement>(null);
 
     const [drag, setDrag] = useState(false);
     const [isConfirmed, setIsConfirmed] = useState(false);
@@ -22,7 +23,7 @@ const SwipeButton = () => {
             if (event.relatedTarget == null) {
                 setDrag(false);
 
-                if (draggableRef.current) {
+                if (draggableRef.current && slideEffectRef.current) {
                     draggableRef.current.style.transition = '0.5s ease-in-out';
 
                     draggableRef.current;
@@ -33,9 +34,11 @@ const SwipeButton = () => {
                     if (event.clientX < containWidth - diff) {
                         draggableRef.current.style.transform = 'none';
                         setIsConfirmed(false);
+                        draggableRef.current.classList.remove('text-blur');
                     } else {
                         draggableRef.current.style.transform = `translateX(${containWidth - 75}px)`;
-                        //  draggableRef.current.style.backgroundColor = '#68ab1e';
+                        draggableRef.current.classList.remove('text-blur');
+                        slideEffectRef.current.style.animationIterationCount = 'initial';
                         setDrag(false);
                         setIsConfirmed(true);
                     }
@@ -51,21 +54,24 @@ const SwipeButton = () => {
         const pointerMoveListener = (event: PointerEvent) => {
             if (isConfirmed) return;
 
-            console.log('.');
-
             console.log('clientX', event.clientX);
 
-            if (draggableRef.current) {
+            if (draggableRef.current && slideEffectRef.current) {
                 const containWidth = constraintsRef.current?.clientWidth as number;
 
                 draggableRef.current.style.transition = 'none';
-                // draggableRef.current.children[3].s .style.color = 'rgba(0, 0, 0, 0.1)';
+                draggableRef.current.classList.add('text-blur');
+
+                slideEffectRef.current.classList.add('active');
+
+                // console.log('children', draggableRef.current);
 
                 if (event.clientX < containWidth) {
                     draggableRef.current.style.transform = `translateX(${event.clientX - 80}px)`;
                 } else {
                     draggableRef.current.style.transform = `translateX(${containWidth - 75}px)`;
-                    // draggableRef.current.style.backgroundColor = '#68ab1e';
+                    draggableRef.current.classList.remove('text-blur');
+                    slideEffectRef.current.style.animationIterationCount = 'initial';
                     setDrag(false);
                     setIsConfirmed(true);
                 }
@@ -74,7 +80,6 @@ const SwipeButton = () => {
 
         if (drag) {
             document.body.addEventListener('pointermove', pointerMoveListener);
-            // setIsConfirmed(false);
             return () => document.body.removeEventListener('pointermove', pointerMoveListener);
         }
     }, [drag, constraintsRef, draggableRef]);
@@ -82,7 +87,7 @@ const SwipeButton = () => {
     return (
         <div>
             <div
-                className='w-full h-[80px] relative border-yellow-950 overflow-hidden rounded-full'
+                className='w-full h-[70px] relative overflow-hidden rounded-full'
                 ref={constraintsRef}
             >
                 <div
@@ -90,15 +95,22 @@ const SwipeButton = () => {
                     ref={draggableRef}
                 >
                     <div>{''}</div>
-                    <div className='font-sarabun'>ยืนยันสำเร็จ</div>
+                    <div className='text font-sarabun'>ยืนยันสำเร็จ</div>
                     <div
-                        className='bg-white rounded-full border-1 p-5 cursor-pointer'
+                        className='bg-white rounded-full border-1 p-4 cursor-pointer'
                         onPointerDown={handlePointerDown}
                     >
-                        <FaArrowRight className='text-gray-500 text-[26px]' />
+                        {isConfirmed ? (
+                            <FaCheck className='text-green-700 text-[26px]' />
+                        ) : (
+                            <FaArrowRight className='text-gray-400 text-[26px]' />
+                        )}
                     </div>
-                    <div className='font-sarabun'>เลื่อนเพื่อยืนยัน</div>
+                    <div className='text font-sarabun'>เลื่อนเพื่อยืนยัน</div>
                     <div>{''}</div>
+                    <div className='swipe-slide-effect' ref={slideEffectRef}>
+                        {''}
+                    </div>
                 </div>
             </div>
             <div className='mt-5'>confirm: {isConfirmed ? 'true' : 'false'}</div>
